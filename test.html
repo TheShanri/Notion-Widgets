@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Date Widget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+        .date-widget {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 18px;
+            color: #333;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="date-widget" id="dateWidget"></div>
+
+    <script>
+        // Get today's date
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString(undefined, {
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+        });
+
+        // Display the date
+        document.getElementById('dateWidget').innerText = `Today's Date: ${formattedDate}`;
+    </script>
+</body>
+</html>
