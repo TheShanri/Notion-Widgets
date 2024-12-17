@@ -3,43 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Today's Date Widget</title>
+    <title>Current Corruption Widget</title>
     <style>
         body {
+            background-color: #191919; /* Notion dark theme background */
+            color: #ffffff; /* Text color */
             font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f9f9f9;
         }
-        .date-widget {
-            padding: 10px 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 18px;
-            color: #333;
-            background-color: #fff;
+
+        .progress-circle {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #4F46E5 calc(var(--percentage) * 1%), 
+                #2F2F2F calc(var(--percentage) * 1%)
+            );
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .progress-circle::before {
+            content: "";
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-color: #191919;
+            border-radius: 50%;
+        }
+
+        .progress-text {
+            position: absolute;
+            z-index: 2;
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
-    <div class="date-widget" id="dateWidget"></div>
+    <div class="progress-circle" id="progressCircle" style="--percentage: 0;">
+        <div class="progress-text" id="progressText">0%</div>
+    </div>
 
     <script>
-        // Get today's date
-        const today = new Date();
-        const formattedDate = today.toLocaleDateString(undefined, {
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric'
-        });
+        // Date Calculation
+        const startDate = new Date("2001-07-07");
+        const eventDate = new Date("2024-12-17");
+        const offsetDays = 210;
 
-        // Display the date
-        document.getElementById('dateWidget').innerText = `Today's Date: ${formattedDate}`;
+        const today = new Date();
+
+        const totalDaysNumerator = Math.floor((eventDate - today) / (1000 * 60 * 60 * 24)) + offsetDays;
+        const totalDaysDenominator = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+
+        let corruptionPercentage = ((totalDaysNumerator / totalDaysDenominator) * 100).toFixed(1);
+        corruptionPercentage = Math.max(0, Math.min(100, corruptionPercentage)); // Clamp between 0% and 100%
+
+        // Update Progress Circle
+        document.getElementById('progressCircle').style.setProperty('--percentage', corruptionPercentage);
+        document.getElementById('progressText').innerText = corruptionPercentage + '%';
     </script>
 </body>
 </html>
