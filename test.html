@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Current Corruption Widget</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corruption & Moments Since Last Fall</title>
     <style>
         body {
-            background-color: #191919; /* Notion dark theme background */
-            color: #ffffff; /* Text color */
-            font-family: Arial, sans-serif;
+            background-color: #191919;
+            color: #ffffff;
+            font-family: "Times New Roman", Times, serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
         }
@@ -30,6 +31,7 @@
             align-items: center;
             font-size: 1.5rem;
             font-weight: bold;
+            margin-bottom: 40px;
         }
 
         .progress-circle::before {
@@ -46,6 +48,16 @@
             z-index: 2;
             color: #ffffff;
         }
+
+        .time-container {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 20px 0 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -53,23 +65,101 @@
         <div class="progress-text" id="progressText">0%</div>
     </div>
 
-    <script>
-        // Date Calculation
-        const startDate = new Date("2001-07-07");
-        const eventDate = new Date("2024-12-17");
-        const offsetDays = 210;
+    <h1>Moments Since Last Fall</h1>
+    <div class="time-container" id="timeContainer"></div>
 
+    <script>
+        // Corruption Percentage Calculation
+        const startDate = new Date("2001-07-07");
+        const referenceDate = new Date("2024-12-17");
         const today = new Date();
 
-        const totalDaysNumerator = Math.floor((eventDate - today) / (1000 * 60 * 60 * 24)) + offsetDays;
-        const totalDaysDenominator = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        const daysSince2001 = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+        const daysSince2024 = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
 
-        let corruptionPercentage = ((totalDaysNumerator / totalDaysDenominator) * 100).toFixed(1);
-        corruptionPercentage = Math.max(0, Math.min(100, corruptionPercentage)); // Clamp between 0% and 100%
+        // Formula:
+        // ((days since july 7th, 2001) - (days since dec 17th,2024 +50+210+3650)) / (days since july 7th 2001)
+        const numerator = daysSince2001 - (daysSince2024 + 50 + 210 + 3650);
+        let corruptionPercentage = (numerator / daysSince2001) * 100;
+        corruptionPercentage = Math.max(0, Math.min(100, corruptionPercentage.toFixed(1)));
 
-        // Update Progress Circle
         document.getElementById('progressCircle').style.setProperty('--percentage', corruptionPercentage);
         document.getElementById('progressText').innerText = corruptionPercentage + '%';
+
+
+        // Moments Since Last Fall Calculation (Count Up)
+        const fallStartDate = new Date("2023-10-26T19:00:00");
+
+        function updateTime() {
+            const now = new Date();
+            let diff = now - fallStartDate; 
+            if (diff < 0) {
+                document.getElementById('timeContainer').textContent = "Not yet reached!";
+                return;
+            }
+
+            // Breakdown times
+            const totalSeconds = Math.floor(diff / 1000);
+            const totalMinutes = Math.floor(totalSeconds / 60);
+            const totalHours = Math.floor(totalMinutes / 60);
+            const totalDays = Math.floor(totalHours / 24);
+
+            let years = Math.floor(totalDays / 365);
+            let remainingDays = totalDays % 365;
+            let months = Math.floor(remainingDays / 30);
+            remainingDays = remainingDays % 30;
+            let weeks = Math.floor(remainingDays / 7);
+            remainingDays = remainingDays % 7;
+
+            let usedDays = (years * 365) + (months * 30) + (weeks * 7) + remainingDays;
+            let remainingMs = diff - (usedDays * 24 * 60 * 60 * 1000);
+            let finalHours = Math.floor(remainingMs / (3600 * 1000));
+            remainingMs -= finalHours * 3600 * 1000;
+
+            let finalMinutes = Math.floor(remainingMs / (60 * 1000));
+            remainingMs -= finalMinutes * 60 * 1000;
+
+            let finalSeconds = Math.floor(remainingMs / 1000);
+
+            // Build display parts
+            let parts = [];
+            if (years > 0) {
+                parts.push(years + " year" + (years !== 1 ? "s" : ""));
+                parts.push(months + " month" + (months !== 1 ? "s" : ""));
+                parts.push(weeks + " week" + (weeks !== 1 ? "s" : ""));
+                parts.push(remainingDays + " day" + (remainingDays !== 1 ? "s" : ""));
+            } else if (months > 0) {
+                parts.push(months + " month" + (months !== 1 ? "s" : ""));
+                parts.push(weeks + " week" + (weeks !== 1 ? "s" : ""));
+                parts.push(remainingDays + " day" + (remainingDays !== 1 ? "s" : ""));
+            } else if (weeks > 0) {
+                parts.push(weeks + " week" + (weeks !== 1 ? "s" : ""));
+                parts.push(remainingDays + " day" + (remainingDays !== 1 ? "s" : ""));
+            } else if (remainingDays > 0) {
+                parts.push(remainingDays + " day" + (remainingDays !== 1 ? "s" : ""));
+            }
+
+            // Append smaller units
+            if (years > 0 || months > 0 || weeks > 0 || remainingDays > 0) {
+                parts.push(finalHours + " hour" + (finalHours !== 1 ? "s" : ""));
+                parts.push(finalMinutes + " minute" + (finalMinutes !== 1 ? "s" : ""));
+                parts.push(finalSeconds + " second" + (finalSeconds !== 1 ? "s" : ""));
+            } else if (finalHours > 0) {
+                parts.push(finalHours + " hour" + (finalHours !== 1 ? "s" : ""));
+                parts.push(finalMinutes + " minute" + (finalMinutes !== 1 ? "s" : ""));
+                parts.push(finalSeconds + " second" + (finalSeconds !== 1 ? "s" : ""));
+            } else if (finalMinutes > 0) {
+                parts.push(finalMinutes + " minute" + (finalMinutes !== 1 ? "s" : ""));
+                parts.push(finalSeconds + " second" + (finalSeconds !== 1 ? "s" : ""));
+            } else {
+                parts.push(finalSeconds + " second" + (finalSeconds !== 1 ? "s" : ""));
+            }
+
+            document.getElementById('timeContainer').textContent = parts.join(" ");
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
     </script>
 </body>
 </html>
